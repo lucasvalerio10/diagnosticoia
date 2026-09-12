@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Diagnóstico de IA — LXD Digital</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- ============================================================
+    META PIXEL — cole seu código aqui quando tiver o Pixel ID
+    ============================================================ -->
+  <!-- <script>...</script> -->
+
+  <!-- ============================================================
+    GOOGLE TAG MANAGER — cole seu código aqui quando tiver o GTM ID
+    ============================================================ -->
+  <!-- <script>...</script> -->
+
+  <style>
+    :root {
+      --bg:           #07090f;
+      --card:         #0c0f1a;
+      --border:       rgba(90, 120, 255, 0.16);
+      --border-hover: rgba(90, 120, 255, 0.48);
+      --accent:       #5a78ff;
+      --accent2:      #8b5cf6;
+      --text:         #eef0f8;
+      --muted:        #6b7280;
+      --success:      #34d399;
+      --error:        #f87171;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100svh;
+      display: grid;
+      place-items: start center;
+      padding: 28px 16px 40px;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 72% 0%,  rgba(90,120,255,.11) 0%, transparent 48%),
+        radial-gradient(ellipse at 8%  85%, rgba(139,92,246,.09) 0%, transparent 42%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Shell ── */
+    .shell { width: 100%; max-width: 620px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow:
+        0 40px 100px rgba(0,0,0,.55),
+        inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    /* ── Header ── */
+    .header { padding: 32px 32px 24px; text-align: center; }
+
+    .header img.logo {
+      display: block;
+      height: 48px;
+      width: auto;
+      margin: 0 auto 20px;
+      object-fit: contain;
+    }
+
+    /* Fallback text logo — remova quando tiver o PNG do logo */
+    .logo-text {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .logo-text span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 13px;
+      background: rgba(90,120,255,.08);
+      border: 1px solid rgba(90,120,255,.22);
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 2.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(22px, 5vw, 34px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -.03em;
+      margin-bottom: 10px;
+    }
+    .header p { color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+    /* ── Progress ── */
+    .progress-wrap { padding: 0 32px; }
+    .progress-track {
+      height: 3px;
+      background: rgba(255,255,255,.06);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: inherit;
+      transition: width .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Body ── */
+    .body { padding: 26px 32px 32px; }
+
+    .step-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .step-meta .accent { color: var(--accent); }
+
+    .body h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(17px, 3.8vw, 23px);
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: -.02em;
+      margin-bottom: 20px;
+    }
+
+    /* ── Options ── */
+    .options { display: grid; gap: 8px; }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #d4d7e8;
+      font: 500 14px/1.4 'Inter', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+      word-break: break-word;
+    }
+    .opt:hover, .opt:focus { outline:none; border-color: var(--border-hover); background: rgba(90,120,255,.07); }
+    .opt:active { transform: scale(.99); }
+
+    .dot {
+      flex: 0 0 15px;
+      width: 15px; height: 15px;
+      border: 1.5px solid rgba(90,120,255,.35);
+      border-radius: 50%;
+      transition: border-color .15s, background .15s;
+    }
+    .opt:hover .dot, .opt:focus .dot { border-color: var(--accent); background: rgba(90,120,255,.18); }
+
+    /* ── Fields ── */
+    .fields { display: grid; gap: 13px; }
+
+    label.lbl {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    input.inp {
+      width: 100%;
+      padding: 13px 15px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font: 400 15px 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input.inp::placeholder { color: #2e3352; }
+    input.inp:focus { border-color: rgba(90,120,255,.55); box-shadow: 0 0 0 3px rgba(90,120,255,.1); }
+
+    /* ── Nav ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .btn-back {
+      padding: 8px 2px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font: 700 11px 'Inter', sans-serif;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color .15s;
+    }
+    .btn-back:hover { color: var(--text); }
+
+    .btn-submit {
+      width: 100%;
+      min-height: 56px;
+      padding: 0 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font: 700 13px 'Space Grotesk', sans-serif;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(90,120,255,.3);
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-submit:hover { opacity: .88; }
+    .btn-submit:active { transform: scale(.99); }
+    .btn-submit:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Error ── */
+    .err { margin-top: 10px; color: var(--error); font-size: 13px; text-align: center; line-height: 1.5; }
+
+    /* ── Success ── */
+    .success {
+      display: grid;
+      place-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      text-align: center;
+    }
+    .check-icon {
+      width: 72px; height: 72px;
+      display: grid; place-items: center;
+      border: 1px solid rgba(52,211,153,.4);
+      border-radius: 50%;
+      font-size: 28px;
+      color: var(--success);
+      background: rgba(52,211,153,.06);
+    }
+    .success h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+    .success p { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 400px; }
+
+    /* ── Score chip (oculto ao usuário final) ── */
+    .score-debug { display: none; }
+
+    /* ── Footnote ── */
+    .footnote {
+      text-align: center;
+      margin-top: 16px;
+      color: #2e3352;
+      font-size: 12px;
+    }
+
+    /* ── Animation ── */
+    @media (prefers-reduced-motion: no-preference) {
+      .body { animation: fadeUp .28s ease both; }
+      @keyframes fadeUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      body { padding: 10px 8px 32px; align-items: start; }
+      .card { border-radius: 16px; }
+      .header { padding: 22px 18px 18px; }
+      .progress-wrap { padding: 0 18px; }
+      .body { padding: 20px 18px 24px; }
+      .opt:hover, .opt:focus { transform: none; }
+    }
+    @media (max-width: 360px) {
+      .header, .body { padding-inline: 14px; }
+      .progress-wrap { padding-inline: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="card">
+
+      <header class="header">
+        <!-- LOGO: descomente e substitua src quando tiver o arquivo do logo -->
+        <!-- <img class="logo" src="seu-logo.png" alt="LXD Digital"> -->
+
+        <!-- Logo em texto — apague este bloco quando colocar a imagem acima -->
+        <div class="logo-text">LXD<span>Digital</span></div>
+
+        <div class="badge">Diagnóstico gratuito de IA</div>
+        <h1>Descubra onde a IA pode transformar seu negócio</h1>
+        <p>Responda 7 perguntas. Nossa equipe analisa seu perfil e entra em contato com um plano personalizado.</p>
+      </header>
+
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="pfill"></div>
+        </div>
+      </div>
+
+      <main class="body" id="fbody" aria-live="polite"></main>
+    </div>
+
+    <p class="footnote">Seus dados são confidenciais e não serão compartilhados.</p>
+  </div>
+
+<script>
+// ================================================================
+//  CONFIGURAÇÃO — preencha antes de publicar
+// ================================================================
+const GAS_URL = 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+// Exemplo: 'https://script.google.com/macros/s/AKfycb.../exec'
+// Instruções completas no arquivo apps-script.js entregue junto
+// ================================================================
+
+// ── Perguntas ──────────────────────────────────────────────────
+const QS = [
+  {
+    id: 'faturamento',
+    q: 'Qual é o faturamento mensal atual da sua empresa?',
+    opts: [
+      { l: 'Ainda não temos faturamento',    s: 0 },
+      { l: 'Até R$ 10 mil',                  s: 1 },
+      { l: 'De R$ 10 mil a R$ 30 mil',       s: 2 },
+      { l: 'De R$ 30 mil a R$ 80 mil',       s: 3 },
+      { l: 'De R$ 80 mil a R$ 200 mil',      s: 4 },
+      { l: 'Mais de R$ 200 mil',             s: 5 },
+    ]
+  },
+  {
+    id: 'funcionarios',
+    q: 'Quantas pessoas trabalham na sua empresa, incluindo você?',
+    opts: [
+      { l: 'Só eu (1 pessoa)',        s: 0 },
+      { l: '2 a 5 pessoas',           s: 1 },
+      { l: '6 a 20 pessoas',          s: 2 },
+      { l: '21 a 100 pessoas',        s: 3 },
+      { l: 'Mais de 100 pessoas',     s: 4 },
+    ]
+  },
+  {
+    id: 'gargalo',
+    q: 'Qual é o principal problema travando seu crescimento hoje?',
+    opts: [
+      { l: 'Perco muito tempo em tarefas repetitivas e manuais',      s: 2 },
+      { l: 'Atendimento ao cliente lento, inconstante ou sobrecarregado', s: 2 },
+      { l: 'Não consigo escalar sem contratar mais pessoas',           s: 2 },
+      { l: 'Tenho dados mas não sei usá-los para tomar decisões',     s: 2 },
+      { l: 'Operação depende demais de pessoas específicas',           s: 2 },
+      { l: 'Outro gargalo',                                            s: 1 },
+    ]
+  },
+  {
+    id: 'area_ia',
+    q: 'Em qual área você mais quer implementar Inteligência Artificial?',
+    opts: [
+      { l: 'Atendimento ao cliente (chatbot, WhatsApp, suporte)', s: 2 },
+      { l: 'Automação de processos internos e operação',          s: 2 },
+      { l: 'Vendas e prospecção de clientes',                     s: 2 },
+      { l: 'Marketing e criação de conteúdo',                     s: 2 },
+      { l: 'Análise de dados e relatórios',                       s: 2 },
+      { l: 'Preciso de ajuda para descobrir onde aplicar',        s: 1 },
+    ]
+  },
+  {
+    id: 'uso_ia',
+    q: 'Como sua empresa usa Inteligência Artificial hoje?',
+    opts: [
+      { l: 'Não usamos nada ainda',                                    s: 1 },
+      { l: 'Usamos ChatGPT ou ferramentas básicas no dia a dia',       s: 2 },
+      { l: 'Temos algumas automações mas sem estrutura definida',      s: 2 },
+      { l: 'Já investimos em IA e queremos avançar mais',              s: 3 },
+    ]
+  },
+  {
+    id: 'urgencia',
+    q: 'Em quanto tempo você quer implementar uma solução?',
+    opts: [
+      { l: 'Preciso resolver isso agora (é urgente)',    s: 4 },
+      { l: 'Nos próximos 30 dias',                       s: 3 },
+      { l: 'Nos próximos 3 meses',                       s: 2 },
+      { l: 'Nos próximos 6 meses',                       s: 1 },
+      { l: 'Ainda estou avaliando',                      s: 0 },
+    ]
+  },
+  {
+    id: 'investimento',
+    q: 'Se identificarmos o caminho certo, qual investimento você teria disponível para implementar?',
+    opts: [
+      { l: 'Ainda não tenho orçamento definido',  s: 0 },
+      { l: 'Até R$ 2 mil',                        s: 1 },
+      { l: 'De R$ 2 mil a R$ 5 mil',              s: 2 },
+      { l: 'De R$ 5 mil a R$ 15 mil',             s: 3 },
+      { l: 'De R$ 15 mil a R$ 30 mil',            s: 4 },
+      { l: 'Mais de R$ 30 mil',                   s: 5 },
+    ]
+  }
+];
+
+// ── Estado ─────────────────────────────────────────────────────
+const ST = { step: 0, ans: {}, scores: {}, sending: false };
+
+// ── UTM capture ───────────────────────────────────────────────
+function getUTMs() {
+  const p = new URLSearchParams(location.search);
+  const keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid'];
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem('lxd-utm') || '{}'); } catch {}
+  const d = {};
+  keys.forEach(k => { d[k] = p.get(k) || saved[k] || ''; });
+  d.referrer     = saved.referrer     || document.referrer || '';
+  d.landing_page = saved.landing_page || location.href;
+  try { sessionStorage.setItem('lxd-utm', JSON.stringify(d)); } catch {}
+  return d;
+}
+const UTM = getUTMs();
+
+// ── Refs ──────────────────────────────────────────────────────
+const $body = document.getElementById('fbody');
+const $fill  = document.getElementById('pfill');
+
+// ── Score ─────────────────────────────────────────────────────
+// Máximo possível: 5+4+2+2+3+4+5 = 25
+// 🔥 Alta prioridade : 15 ou mais
+// 🟡 Potencial       : 7 a 14
+// ⚪ Baixa prioridade: 0 a 6
+function totalScore() { return Object.values(ST.scores).reduce((a,b) => a+b, 0); }
+function classify(s)  {
+  if (s >= 15) return '🔥 Alta prioridade';
+  if (s >= 7)  return '🟡 Potencial';
+  return '⚪ Baixa prioridade';
+}
+
+// ── Analytics helper ──────────────────────────────────────────
+function track(name, data = {}) {
+  try { if (window.dataLayer) window.dataLayer.push({ event: name, ...data }); } catch {}
+  try { if (window.fbq) window.fbq('trackCustom', name, data); } catch {}
+}
+
+// ── Render ────────────────────────────────────────────────────
+function pct() {
+  return Math.round((ST.step / (QS.length + 1)) * 100);
+}
+
+function render() {
+  $fill.style.width = pct() + '%';
+  track('form_step', { step: ST.step, total: QS.length });
+  ST.step < QS.length ? renderQ() : renderContact();
+}
+
+function renderQ() {
+  const q = QS[ST.step];
+  const total = QS.length;
+
+  $body.innerHTML = `
+    <div class="step-meta">
+      <span class="accent">Etapa ${ST.step + 1}</span>
+      <span>${ST.step + 1} de ${total}</span>
+    </div>
+    <h2>${safe(q.q)}</h2>
+    <div class="options" id="opts"></div>
+    ${ST.step > 0 ? `<div class="nav"><button class="btn-back" type="button">← Voltar</button></div>` : ''}
+  `;
+
+  const grid = $body.querySelector('#opts');
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="dot"></span><span>${safe(o.l)}</span>`;
+    btn.onclick = () => {
+      ST.ans[q.id]    = o.l;
+      ST.scores[q.id] = o.s;
+      ST.step++;
+      render();
+    };
+    grid.appendChild(btn);
+  });
+
+  const bk = $body.querySelector('.btn-back');
+  if (bk) bk.onclick = () => { ST.step--; render(); };
+}
+
+function renderContact() {
+  $fill.style.width = Math.round((QS.length / (QS.length + 1)) * 100) + '%';
+
+  $body.innerHTML = `
+    <div class="step-meta">
+      <span class="accent">Última etapa</span>
+      <span>Seus dados</span>
+    </div>
+    <h2>Para onde enviamos a análise do seu diagnóstico?</h2>
+    <div class="fields">
+      <label class="lbl">Nome completo
+        <input class="inp" name="nome"      type="text"  required minlength="3"  autocomplete="name"  placeholder="Como você se chama">
+      </label>
+      <label class="lbl">WhatsApp com DDD
+        <input class="inp" name="whatsapp"  type="tel"   required minlength="10" autocomplete="tel" inputmode="tel" placeholder="(11) 99999-0000">
+      </label>
+      <label class="lbl">E-mail profissional
+        <input class="inp" name="email"     type="email" required autocomplete="email" placeholder="voce@empresa.com">
+      </label>
+      <label class="lbl">Nome da empresa
+        <input class="inp" name="empresa"   type="text"  required minlength="2"  placeholder="Nome da sua empresa">
+      </label>
+      <label class="lbl">Seu cargo ou função
+        <input class="inp" name="cargo"     type="text"  placeholder="CEO, Diretor, Sócio...">
+      </label>
+      <label class="lbl">Instagram ou site da empresa <small style="font-weight:400;text-transform:none">(opcional)</small>
+        <input class="inp" name="instagram" type="text"  autocomplete="off" placeholder="@suaempresa ou site.com.br">
+      </label>
+      <button class="btn-submit" type="button" id="bsend">Enviar meu diagnóstico →</button>
+      <p class="err" id="ferr" hidden></p>
+    </div>
+    <div class="nav"><button class="btn-back" type="button">← Voltar</button></div>
+  `;
+
+  $body.querySelector('.btn-back').onclick = () => { ST.step--; render(); };
+  $body.querySelector('#bsend').onclick = doSubmit;
+}
+
+// ── Submit ────────────────────────────────────────────────────
+async function doSubmit() {
+  if (ST.sending) return;
+
+  const fields = $body.querySelectorAll('.inp');
+  let ok = true;
+  const vals = {};
+
+  fields.forEach(f => {
+    const v = f.value.trim();
+    if (f.required && !v) { f.focus(); ok = false; }
+    if (f.type === 'email' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { f.focus(); ok = false; }
+    vals[f.name] = v;
+  });
+
+  if (!ok) { showErr('Preencha todos os campos obrigatórios antes de continuar.'); return; }
+
+  if (!GAS_URL || GAS_URL.includes('COLE_AQUI')) {
+    showErr('⚠️ Configure a URL do Apps Script antes de publicar. Veja o arquivo de instruções.');
+    return;
+  }
+
+  const score = totalScore();
+  const label = classify(score);
+
+  const payload = {
+    data:        new Date().toISOString(),
+    nome:        vals.nome,
+    whatsapp:    vals.whatsapp,
+    email:       vals.email,
+    empresa:     vals.empresa,
+    cargo:       vals.cargo,
+    instagram:   vals.instagram,
+    faturamento: ST.ans.faturamento  || '',
+    funcionarios:ST.ans.funcionarios || '',
+    gargalo:     ST.ans.gargalo      || '',
+    area_ia:     ST.ans.area_ia      || '',
+    uso_ia:      ST.ans.uso_ia       || '',
+    urgencia:    ST.ans.urgencia     || '',
+    investimento:ST.ans.investimento || '',
+    lead_score:  score,
+    classificacao: label,
+    utm_source:   UTM.utm_source,
+    utm_medium:   UTM.utm_medium,
+    utm_campaign: UTM.utm_campaign,
+    utm_content:  UTM.utm_content,
+    utm_term:     UTM.utm_term,
+    gclid:        UTM.gclid,
+    fbclid:       UTM.fbclid,
+    referrer:     UTM.referrer,
+    pagina:       UTM.landing_page
+  };
+
+  ST.sending = true;
+  const btn = $body.querySelector('#bsend');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  hideErr();
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    $fill.style.width = '100%';
+    track('form_complete', { score, label });
+    renderSuccess();
+
+  } catch {
+    ST.sending = false;
+    btn.disabled = false;
+    btn.textContent = 'Enviar meu diagnóstico →';
+    showErr('Não foi possível enviar. Verifique sua conexão e tente novamente.');
+  }
+}
+
+function renderSuccess() {
+  $body.innerHTML = `
+    <div class="success">
+      <div class="check-icon">✓</div>
+      <h2>Diagnóstico enviado!</h2>
+      <p>Recebemos suas respostas.<br>Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp que você informou.</p>
+    </div>
+  `;
+}
+
+function showErr(m) { const e = $body.querySelector('#ferr'); if (e) { e.hidden=false; e.textContent=m; } }
+function hideErr()  { const e = $body.querySelector('#ferr'); if (e) e.hidden=true; }
+function safe(v)    { return String(v||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+// ── Start ─────────────────────────────────────────────────────
+track('form_start');
+render();
+</script>
+</body>
+</html>
