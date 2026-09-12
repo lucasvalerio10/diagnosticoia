@@ -385,24 +385,24 @@ const QS = [
     id: 'gargalo',
     q: 'Qual é o principal problema travando seu crescimento hoje?',
     opts: [
-      { l: 'Perco muito tempo em tarefas repetitivas e manuais',      s: 2 },
-      { l: 'Atendimento ao cliente lento, inconstante ou sobrecarregado', s: 2 },
-      { l: 'Não consigo escalar sem contratar mais pessoas',           s: 2 },
-      { l: 'Tenho dados mas não sei usá-los para tomar decisões',     s: 2 },
-      { l: 'Operação depende demais de pessoas específicas',           s: 2 },
-      { l: 'Outro gargalo',                                            s: 1 },
+      { l: 'Perco muito tempo em tarefas repetitivas e manuais',      s: 0 },
+      { l: 'Atendimento ao cliente lento, inconstante ou sobrecarregado', s: 0 },
+      { l: 'Não consigo escalar sem contratar mais pessoas',           s: 0 },
+      { l: 'Tenho dados mas não sei usá-los para tomar decisões',     s: 0 },
+      { l: 'Operação depende demais de pessoas específicas',           s: 0 },
+      { l: 'Outro gargalo',                                            s: 0 },
     ]
   },
   {
     id: 'area_ia',
     q: 'Em qual área você mais quer implementar Inteligência Artificial?',
     opts: [
-      { l: 'Atendimento ao cliente (chatbot, WhatsApp, suporte)', s: 2 },
-      { l: 'Automação de processos internos e operação',          s: 2 },
-      { l: 'Vendas e prospecção de clientes',                     s: 2 },
-      { l: 'Marketing e criação de conteúdo',                     s: 2 },
-      { l: 'Análise de dados e relatórios',                       s: 2 },
-      { l: 'Preciso de ajuda para descobrir onde aplicar',        s: 1 },
+      { l: 'Atendimento ao cliente (chatbot, WhatsApp, suporte)', s: 0 },
+      { l: 'Automação de processos internos e operação',          s: 0 },
+      { l: 'Vendas e prospecção de clientes',                     s: 0 },
+      { l: 'Marketing e criação de conteúdo',                     s: 0 },
+      { l: 'Análise de dados e relatórios',                       s: 0 },
+      { l: 'Preciso de ajuda para descobrir onde aplicar',        s: 0 },
     ]
   },
   {
@@ -419,9 +419,9 @@ const QS = [
     id: 'urgencia',
     q: 'Em quanto tempo você quer implementar uma solução?',
     opts: [
-      { l: 'Preciso resolver isso agora (é urgente)',    s: 4 },
-      { l: 'Nos próximos 30 dias',                       s: 3 },
-      { l: 'Nos próximos 3 meses',                       s: 2 },
+      { l: 'Preciso resolver isso agora (é urgente)',    s: 3 },
+      { l: 'Nos próximos 30 dias',                       s: 2 },
+      { l: 'Nos próximos 3 meses',                       s: 1 },
       { l: 'Nos próximos 6 meses',                       s: 1 },
       { l: 'Ainda estou avaliando',                      s: 0 },
     ]
@@ -469,8 +469,8 @@ const $fill  = document.getElementById('pfill');
 // ⚪ Baixa prioridade: 0 a 6
 function totalScore() { return Object.values(ST.scores).reduce((a,b) => a+b, 0); }
 function classify(s)  {
-  if (s >= 12) return '🔥 Alta prioridade';
-  if (s >= 6)  return '🟡 Potencial';
+  if (s >= 11) return '🔥 Alta prioridade';
+  if (s >= 5)  return '🟡 Potencial';
   return '⚪ Baixa prioridade';
 }
 
